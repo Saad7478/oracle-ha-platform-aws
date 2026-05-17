@@ -71,10 +71,18 @@ variable "admin_cidr" {
 # Bastion instance type
 # -------------------
 
-variable "instance_type" {
+variable "bastion_instance_type" {
   description = "Bastion instance type"
+  type        = string
+}
 
-  type = string
+# -------------------
+# Oracle instance type
+# -------------------
+
+variable "oracle_instance_type" {
+  description = "Oracle instance type"
+  type        = string
 }
 
 # -------------------
