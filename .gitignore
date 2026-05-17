@@ -1,0 +1,17 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+# Variables
+*.tfvars
+*.pem
+*.key
+
+# Ansible
+*.retry
+
+# IDE
+.vscode/
+.idea/
