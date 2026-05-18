@@ -1,0 +1,5 @@
+- hosts: oracle_servers
+  become: yes
+
+  roles:
+    - oracle_clean

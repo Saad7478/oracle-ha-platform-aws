@@ -1,17 +1,111 @@
-# Terraform
-.terraform/
-*.tfstate
-*.tfstate.*
-crash.log
-
-# Variables
-*.tfvars
-*.pem
-*.key
-
+# =========================================================
 # Ansible
+# =========================================================
+
+# Vault / secrets
+*.vault
+vault.yml
+vault.yaml
+
+group_vars/*/vault.yml
+group_vars/*/vault.yaml
+host_vars/*/vault.yml
+host_vars/*/vault.yaml
+
+# Inventories locaux
+inventory.ini
+hosts.ini
+inventory.yml
+inventory.yaml
+
+inventories/*/hosts.local
+inventories/*/group_vars/private.yml
+
+# Retry files
 *.retry
+
+# Logs / temp
+*.log
+*.tmp
+*.bak
+
+# Downloaded roles / collections
+collections/
+roles/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
 
 # IDE
 .vscode/
 .idea/
+
+# macOS / Linux
+.DS_Store
+Thumbs.db
+
+# =========================================================
+# Terraform
+# =========================================================
+
+# Terraform cache
+.terraform/
+
+# Terraform state
+*.tfstate
+*.tfstate.*
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Sensitive variable files
+*.tfvars
+*.tfvars.json
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform lock file
+# Garder si projet d'équipe
+# ignorer si modules génériques
+# .terraform.lock.hcl
+
+# Plans
+*.tfplan
+plan.out
+
+# CLI config
+.terraformrc
+terraform.rc
+
+# =========================================================
+# Optional
+# =========================================================
+
+# SOPS
+*.dec
+
+# direnv
+.envrc
+
+# dotenv
+.env
+.env.*
+
+# kubeconfig
+kubeconfig
+*.kubeconfig
+
+*.zip
+
+
+
+

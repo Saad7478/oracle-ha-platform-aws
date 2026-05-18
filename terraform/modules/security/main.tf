@@ -5,6 +5,14 @@ resource "aws_security_group" "bastion_sg" {
   vpc_id      = var.vpc_id
 
   ingress {
+  description = "Allow ping"
+  from_port   = -1
+  to_port     = -1
+  protocol    = "icmp"
+  cidr_blocks = ["0.0.0.0/0"]
+  }
+  
+  ingress {
     description = "SSH"
 
     from_port   = 22
@@ -31,6 +39,14 @@ resource "aws_security_group" "oracle_sg" {
   name        = "${var.name}-oracle-sg"
   description = "Oracle security group"
   vpc_id      = var.vpc_id
+
+  ingress {
+  description = "Allow ping"
+  from_port   = -1
+  to_port     = -1
+  protocol    = "icmp"
+  cidr_blocks = ["0.0.0.0/0"]
+  }
 
   ingress {
     description = "SSH from Bastion"
