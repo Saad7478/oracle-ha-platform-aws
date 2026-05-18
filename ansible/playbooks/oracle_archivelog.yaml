@@ -1,0 +1,5 @@
+- hosts: primary
+  become: yes
+
+  roles:
+    - oracle_archivelog
