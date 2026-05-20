@@ -1,6 +1,6 @@
 Host bastion
     HostName ${bastion_ip}
-    User ec2-user
+    User rocky
     IdentityFile ~/.ssh/aws-oracle-lab
     ForwardAgent yes
     StrictHostKeyChecking no
@@ -8,7 +8,7 @@ Host bastion
 
 Host primary
     HostName ${primary_ip}
-    User ec2-user
+    User rocky
     IdentityFile ~/.ssh/aws-oracle-lab
     ProxyJump bastion
     StrictHostKeyChecking no
@@ -16,7 +16,7 @@ Host primary
 
 Host standby
     HostName ${standby_ip}
-    User ec2-user
+    User rocky
     IdentityFile ~/.ssh/aws-oracle-lab
     ProxyJump bastion
     StrictHostKeyChecking no

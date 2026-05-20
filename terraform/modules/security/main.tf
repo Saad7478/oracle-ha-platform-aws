@@ -63,8 +63,8 @@ resource "aws_security_group" "oracle_sg" {
   ingress {
     description = "Oracle SQL*Net"
 
-    from_port = 1567
-    to_port   = 1567
+    from_port = 1521
+    to_port   = 1521
     protocol  = "tcp"
 
     cidr_blocks = ["0.0.0.0/0"]

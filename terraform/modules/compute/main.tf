@@ -5,7 +5,9 @@
 resource "aws_instance" "bastion" {
 
   # You must accept the licence before using this ami
-  ami = "ami-00f1df1db4bc83fd1"
+  #ami = "ami-00f1df1db4bc83fd1"  # Oracle Linux 8
+  #ami = "ami-00a9f44477dd83e3d"   # Amazon Linux 3
+  ami = "ami-02391db2758465a87"  # Rocky Linux 8
 
   instance_type = var.bastion_instance_type
 
@@ -22,9 +24,27 @@ resource "aws_instance" "bastion" {
   })
 }
 
+# ELASTIC IP FOR BASTION EC2
+
+resource "aws_eip" "bastion" {
+  domain = "vpc"
+
+  tags = merge(var.tags, {
+    Name = "${var.name}-bastion-eip"
+  })
+}
+
+resource "aws_eip_association" "bastion" {
+  instance_id   = aws_instance.bastion.id
+  allocation_id = aws_eip.bastion.id
+}
+
 resource "aws_instance" "primary_db" {
 
-  ami = "ami-00f1df1db4bc83fd1"
+  #ami = "ami-00f1df1db4bc83fd1"  # Oracle Linux 8
+  #ami = "ami-00a9f44477dd83e3d"   # Amazon Linux 3
+  ami = "ami-02391db2758465a87"  # Rocky Linux 8
+
 
   instance_type = var.oracle_instance_type
 
@@ -47,7 +67,9 @@ resource "aws_instance" "primary_db" {
 
 resource "aws_instance" "standby_db" {
 
-  ami = "ami-00f1df1db4bc83fd1"
+  #ami = "ami-00f1df1db4bc83fd1"  # Oracle Linux 8
+  #ami = "ami-00a9f44477dd83e3d"   # Amazon Linux 3
+  ami = "ami-02391db2758465a87"  # Rocky Linux 8
 
   instance_type = var.oracle_instance_type
 

@@ -1,9 +1,10 @@
 terraform {
   backend "s3" {
-    bucket         = "my-terraform-state2478"
+    bucket         = "my-terraform-state2478v1"
     key            = "oracleDG/dev/terraform.tfstate"
     region         = "us-east-2"
     dynamodb_table = "terraform-locks"
+    profile = "aws2"
   }
 }
 
