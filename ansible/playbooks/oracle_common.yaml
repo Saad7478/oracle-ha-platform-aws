@@ -1,5 +1,0 @@
-- hosts: oracle_servers
-  become: true
-
-  roles:
-    - oracle_common

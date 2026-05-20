@@ -2,4 +2,4 @@
   become: yes
 
   roles:
-    - oracle_listener
+    - oracle_dataguard_prepare

@@ -1,0 +1,9 @@
+- hosts: "{{ target_hosts }}"
+  become: yes
+  
+  vars_files:
+    - group_vars/vault.yaml
+
+  roles:
+    - role: oracle_db_deletion
+      tags: ec2

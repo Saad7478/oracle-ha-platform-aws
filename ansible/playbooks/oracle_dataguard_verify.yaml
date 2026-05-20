@@ -1,0 +1,55 @@
+- name: "DataGuard | Vérification PRIMARY"
+  hosts: primary
+  become: true
+  become_user: oracle
+  environment:
+    ORACLE_HOME: "{{ oracle_home }}"
+    ORACLE_SID:  "{{ oracle_sid }}"
+    PATH:        "{{ oracle_home }}/bin:{{ ansible_env.PATH }}"
+  roles:
+    - oracle_dataguard_verify
+
+- name: "DataGuard | Vérification STANDBY"
+  hosts: standby
+  become: true
+  become_user: oracle
+  environment:
+    ORACLE_HOME: "{{ oracle_home }}"
+    ORACLE_SID:  "{{ oracle_sid }}"
+    PATH:        "{{ oracle_home }}/bin:{{ ansible_env.PATH }}"
+  roles:
+    - oracle_dataguard_verify
+
+- name: "DataGuard | Rapport de synthèse"
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+
+    - name: "RAPPORT | Générer le rapport en fichier"
+      copy:
+        content: |
+          =============================================
+           RAPPORT DE VÉRIFICATION ORACLE DATA GUARD
+           Date : {{ ansible_date_time.iso8601 }}
+          =============================================
+
+          --- PRIMARY ({{ groups['primary'][0] }}) ---
+            Statut         : {{ hostvars[groups['primaryb'][0]]['primary_results']['status'] }}
+            Rôle           : {{ hostvars[groups['primary'][0]]['primary_results']['role'] }}
+            Protection     : {{ hostvars[groups['primary'][0]]['primary_results']['protection'] }}
+            ArchiveLog     : {{ hostvars[groups['primary'][0]]['primary_results']['archivelog'] }}
+            Séquence redo  : {{ hostvars[groups['primary'][0]]['primary_results']['log_seq'] }}
+            Erreurs DG     : {{ hostvars[groups['primary'][0]]['primary_results']['dg_errors'] }}
+
+          --- STANDBY ({{ groups['standby'][0] }}) ---
+            Statut         : {{ hostvars[groups['standby'][0]]['standby_results']['status'] }}
+            Rôle           : {{ hostvars[groups['standby'][0]]['standby_results']['role'] }}
+            MRP actif      : {{ hostvars[groups['standby'][0]]['standby_results']['mrp_active'] }}
+            Lag            : {{ hostvars[groups['standby'][0]]['standby_results']['lag'] }}
+            Dernière seq   : {{ hostvars[groups['standby'][0]]['standby_results']['applied_seq'] }}
+            Erreurs DG     : {{ hostvars[groups['standby'][0]]['standby_results']['dg_errors'] }}
+
+          =============================================
+        dest: "/tmp/dataguard_report_{{ ansible_date_time.date }}.txt"
+      delegate_to: localhost
