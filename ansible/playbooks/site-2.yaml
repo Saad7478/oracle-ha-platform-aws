@@ -1,4 +1,3 @@
-- import_playbook: oracle_db_creation.yaml
 - import_playbook: oracle_archivelog.yaml
 - import_playbook: oracle_dataguard_prepare.yaml
 - import_playbook: oracle_dataguard_standby.yaml

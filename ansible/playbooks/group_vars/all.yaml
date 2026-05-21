@@ -12,3 +12,4 @@ aws_profile: aws2
 sys_password: "{{ vault_sys_password }}"
 system_password: "{{ vault_system_password }}"
 pdbadmin_password: "{{ vault_pdbadmin_password }}"
+dg_config_name: cdb1_DG
