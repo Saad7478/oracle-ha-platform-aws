@@ -108,4 +108,11 @@ kubeconfig
 
 *.vault_pass
 
-*site-2.yaml
+playbooks/oracle_db_deletion.yaml 
+playbooks/start.yaml
+playbooks/stop.yaml
+playbooks/site-2.yaml
+playbooks/oracle_clean.yaml
+roles/oracle_db_deletion/
+roles/oracle_clean/
+roles/ec2_oracle_control/
