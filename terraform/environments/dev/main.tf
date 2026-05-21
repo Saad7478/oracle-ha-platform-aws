@@ -78,6 +78,8 @@ module "compute" {
 
   oracle_sg_id = module.security.oracle_sg_id
 
+  instance_profile_name = module.security.instance_profile_name
+
   aws_region = var.aws_region
 
   tags = var.tags

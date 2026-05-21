@@ -53,6 +53,12 @@ variable "oracle_sg_id" {
 # AWS
 # -------------------
 
+variable "instance_profile_name" {
+  description = "Instance profile name"
+
+  type = string
+}
+
 variable "aws_region" {
   description = "AWS region"
 

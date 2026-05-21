@@ -45,6 +45,7 @@ resource "aws_instance" "primary_db" {
   #ami = "ami-00a9f44477dd83e3d"   # Amazon Linux 3
   ami = "ami-02391db2758465a87"  # Rocky Linux 8
 
+  iam_instance_profile = var.instance_profile_name
 
   instance_type = var.oracle_instance_type
 
@@ -70,6 +71,8 @@ resource "aws_instance" "standby_db" {
   #ami = "ami-00f1df1db4bc83fd1"  # Oracle Linux 8
   #ami = "ami-00a9f44477dd83e3d"   # Amazon Linux 3
   ami = "ami-02391db2758465a87"  # Rocky Linux 8
+
+  iam_instance_profile = var.instance_profile_name
 
   instance_type = var.oracle_instance_type
 

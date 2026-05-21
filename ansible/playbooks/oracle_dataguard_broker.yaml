@@ -3,6 +3,7 @@
 
   vars_files:
     - group_vars/vault.yaml
+    - group_vars/all.yaml
   
   roles:
     - oracle_dataguard_broker

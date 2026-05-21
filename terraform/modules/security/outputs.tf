@@ -11,3 +11,7 @@ output "oracle_sg_id" {
   description = "Oracle security group ID"
   value       = aws_security_group.oracle_sg.id
 }
+
+output "instance_profile_name" {
+  value = aws_iam_instance_profile.oracle_profile.name
+}

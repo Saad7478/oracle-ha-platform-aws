@@ -3,6 +3,7 @@
   
   vars_files:
     - group_vars/vault.yaml
+    - group_vars/all.yaml
 
   roles:
     - role: oracle_db_deletion
