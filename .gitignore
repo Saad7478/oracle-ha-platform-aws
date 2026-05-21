@@ -106,6 +106,6 @@ kubeconfig
 
 *.zip
 
-.vault_pass
+*.vault_pass
 
 
