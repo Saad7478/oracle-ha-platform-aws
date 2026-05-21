@@ -1,0 +1,40 @@
+- name: Configure tnsnames.ora
+  template:
+    src: tnsnames.ora.j2
+    dest: "{{ oracle_home }}/network/admin/tnsnames.ora"
+    owner: oracle
+    group: oinstall
+    mode: '0644'
+    
+- name: Configure listener.ora
+  template:
+    src: listener.ora.j2
+    dest: "{{ oracle_home }}/network/admin/listener.ora"
+    owner: oracle
+    group: oinstall
+    mode: '0644'
+
+- name: Start Oracle listener
+  become: yes
+  become_user: oracle
+  shell: |
+    export ORACLE_HOME={{ oracle_home }}
+    export PATH=$ORACLE_HOME/bin:$PATH
+
+    lsnrctl start {{ listener_name }}
+  failed_when: false
+
+- name: Check listener status
+  become: yes
+  become_user: oracle
+  shell: |
+    export ORACLE_HOME={{ oracle_home }}
+    export PATH=$ORACLE_HOME/bin:$PATH
+
+    lsnrctl status {{ listener_name }}
+  register: listener_status
+  changed_when: false
+
+- name: Debug listener status
+  debug:
+    var: listener_status.stdout_lines

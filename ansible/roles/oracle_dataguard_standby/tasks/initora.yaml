@@ -1,0 +1,7 @@
+- name: Deploy standby init.ora
+  template:
+    src: init_standby.ora.j2
+    dest: "{{ oracle_home }}/dbs/init{{ oracle_sid }}.ora"
+    owner: oracle
+    group: oinstall
+    mode: '0644'

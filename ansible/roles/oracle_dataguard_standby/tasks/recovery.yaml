@@ -1,0 +1,14 @@
+- name: Start managed recovery
+  become: yes
+  become_user: oracle
+  shell: |
+    export ORACLE_HOME={{ oracle_home }}
+    export ORACLE_SID={{ oracle_sid }}
+    export PATH=$ORACLE_HOME/bin:$PATH
+
+    sqlplus / as sysdba <<EOF
+
+    alter database recover managed standby database disconnect from session;
+
+    exit;
+    EOF

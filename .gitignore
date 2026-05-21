@@ -31,7 +31,6 @@ inventories/*/group_vars/private.yml
 
 # Downloaded roles / collections
 collections/
-roles/
 
 # Python
 __pycache__/

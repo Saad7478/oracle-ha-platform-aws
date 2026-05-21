@@ -1,0 +1,24 @@
+- name: "AWS | Build instance list"
+  set_fact:
+    instance_ids: >-
+      {{
+        [
+          hostvars[groups['bastion'][0]]['ec2_instance_id'] | default(None),
+          hostvars[groups['primary'][0]]['ec2_instance_id'] | default(None),
+          hostvars[groups['standby'][0]]['ec2_instance_id'] | default(None)
+        ]
+        | select('ne', None)
+        | list
+      }}
+
+- name: DEBUG instance_ids
+  debug:
+    var: instance_ids
+
+- name: "AWS | Start instances"
+  amazon.aws.ec2_instance:
+    instance_ids: "{{ instance_ids }}"
+    state: running
+    region: "{{ aws_region }}"
+    wait: true
+

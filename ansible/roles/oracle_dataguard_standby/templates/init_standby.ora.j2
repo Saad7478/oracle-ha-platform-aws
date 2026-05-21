@@ -1,0 +1,20 @@
+db_name=cdb1
+db_unique_name={{ standby_unique_name }}
+
+enable_pluggable_database=true
+
+memory_target=600M
+control_files='/u02/oradata/control01.ctl'
+
+fal_server={{ primary_unique_name }}
+
+standby_file_management=AUTO
+
+db_recovery_file_dest='/u02/fra'
+db_recovery_file_dest_size=10G
+
+remote_login_passwordfile='EXCLUSIVE'
+
+db_file_name_convert='/u02/oradata/PARIS/','/u02/oradata/LYON/'
+
+log_file_name_convert='/u02/oradata/PARIS/','/u02/oradata/LYON/'

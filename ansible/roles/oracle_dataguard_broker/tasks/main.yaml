@@ -1,0 +1,69 @@
+- name: Enable Data Guard Broker
+  become: yes
+  become_user: oracle
+  shell: |
+    export ORACLE_HOME={{ oracle_home }}
+    export ORACLE_SID={{ oracle_sid }}
+    export PATH=$ORACLE_HOME/bin:$PATH
+
+    sqlplus / as sysdba <<EOF
+
+    alter system set dg_broker_start=true scope=both;
+
+    exit;
+    EOF
+  #failed_when: false
+
+
+
+- name: Configure Data Guard Broker
+  become: yes
+  become_user: oracle
+  shell: |
+    export ORACLE_HOME={{ oracle_home }}
+    export PATH=$ORACLE_HOME/bin:$PATH
+
+    dgmgrl -silent sys/"{{ sys_password }}"@{{ primary_service_name }} <<EOF
+    CREATE CONFIGURATION '{{ dg_config_name }}'
+    AS PRIMARY DATABASE IS '{{ primary_unique_name }}'
+    CONNECT IDENTIFIER IS '{{ primary_service_name }}';
+
+    ADD DATABASE '{{ standby_unique_name }}'
+    AS CONNECT IDENTIFIER IS '{{ standby_service_name }}'
+    MAINTAINED AS PHYSICAL;
+
+    ENABLE CONFIGURATION;
+
+    SHOW CONFIGURATION;
+
+    EXIT;
+    EOF
+  args:
+    executable: /bin/bash
+  register: broker_config
+  changed_when: "'ORA-' not in broker_config.stdout"
+
+- name: Validate Broker configuration
+  become: yes
+  become_user: oracle
+  shell: |
+    export ORACLE_HOME={{ oracle_home }}
+    export PATH=$ORACLE_HOME/bin:$PATH
+
+    dgmgrl -silent sys/"{{ sys_password }}"@{{ primary_service_name }} <<EOF
+
+    SHOW CONFIGURATION;
+
+    SHOW DATABASE VERBOSE '{{ primary_unique_name }}';
+
+    SHOW DATABASE VERBOSE '{{ standby_unique_name }}';
+
+    EXIT;
+    EOF
+  register: broker_validation
+  changed_when: false
+  when: "'primary' in group_names"
+
+- name: Debug broker validation
+  debug:
+    var: broker_validation.stdout_lines

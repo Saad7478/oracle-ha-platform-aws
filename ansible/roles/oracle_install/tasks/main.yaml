@@ -1,0 +1,88 @@
+- name: Check Oracle zip presence
+  stat:
+    path: /tmp/{{ oracle_install_zip }}
+  register: oracle_zip
+
+- name: Copy Oracle 19c binaries
+  copy:
+    src: "{{ oracle_install_zip }}"
+    dest: /tmp/{{ oracle_install_zip }}
+    owner: oracle
+    group: oinstall
+    mode: '0644'
+  when: not oracle_zip.stat.exists
+
+#- name: Download Oracle 19c binaries from S3
+#  amazon.aws.s3_object:
+#    bucket: "{{ software_s3_bucket }}"
+#    object: "oracle/{{ oracle_install_zip }}"
+#    dest: "/tmp/{{ oracle_install_zip }}"
+#    mode: get
+#    overwrite: different
+#    region: "{{ aws_region }}"
+#  when: not oracle_zip.stat.exists
+
+- name: Unzip Oracle binaries
+  become: yes
+  become_user: oracle
+  shell: |
+    unzip -oq /tmp/{{ oracle_install_zip }} -d {{ oracle_home }}
+    touch {{ oracle_home }}/.unzip_done
+  args:
+    creates: "{{ oracle_home }}/.unzip_done"
+
+- name: Create Oracle inventory directory
+  file:
+    path: "{{ oracle_inventory }}"
+    state: directory
+    owner: oracle
+    group: oinstall
+    mode: '0775'
+
+- name: Generate response file
+  template:
+    src: db_install.rsp.j2
+    dest: /tmp/db_install.rsp
+    owner: oracle
+    group: oinstall
+    mode: '0644'
+
+- name: Run Oracle silent installer
+  become: yes
+  become_user: oracle
+  shell: |
+    export CV_ASSUME_DISTID=OEL7.6
+    
+    {{ oracle_home }}/runInstaller \
+    -silent \
+    -waitforcompletion \
+    -ignorePrereqFailure \
+    -responseFile /tmp/db_install.rsp
+  register: oracle_install
+  args:
+    creates: /u01/app/oraInventory/orainstRoot.sh
+  failed_when:
+    - oracle_install.rc != 0
+    - "'Successfully Setup Software' not in oracle_install.stdout"
+
+- name: Debug installer stdout
+  debug:
+    var: oracle_install.stdout_lines
+
+- name: Debug installer stderr
+  debug:
+    var: oracle_install.stderr_lines
+
+- name: Debug installer return code
+  debug:
+    var: oracle_install.rc
+
+- name: Run orainstRoot.sh
+  shell: "{{ oracle_inventory }}/orainstRoot.sh"
+  args:
+    creates: /etc/oraInst.loc
+
+- name: Run root.sh
+  shell: "{{ oracle_home }}/root.sh"
+  args:
+    creates: /etc/oratab

@@ -1,0 +1,34 @@
+# ----------------------------------------------------------
+# 1. Connectivity & Instance Status
+# ----------------------------------------------------------
+- name: "PRIMARY | CHECK INSTANCE STATUS"
+  shell: |
+    sqlplus -s / as sysdba <<EOF
+    SET PAGESIZE 0 FEEDBACK OFF
+    SELECT status FROM v\$instance;
+    EXIT;
+    EOF
+  register: primary_status
+  changed_when: false
+
+- name: "PRIMARY | DISPLAY INSTANCE_STATUS"
+  debug:
+    msg: "Statut instance PRIMARY : {{ primary_status.stdout | trim }}"
+
+# ----------------------------------------------------------
+# 2. CHECK DATABASE ROLE
+# ----------------------------------------------------------
+- name: "PRIMARY | CHECK DATABASE"
+  shell: |
+    sqlplus -s / as sysdba <<EOF
+    SET PAGESIZE 0 FEEDBACK OFF
+    SELECT name, database_role, open_mode, protection_mode, protection_level, log_mode from v\$database;
+    EXIT;
+    EOF
+  register: primary_role
+  changed_when: false
+
+- name: "PRIMARY | DISPLAY ROLE"
+  debug:
+    msg: "PRIMARY ROLE: {{ primary_role.stdout | trim }}"
+

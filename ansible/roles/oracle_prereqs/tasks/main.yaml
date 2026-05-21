@@ -1,0 +1,121 @@
+#- name: Update packages
+#  dnf:
+#    name: "*"
+#    state: latest
+
+- name: Install useful packages
+  dnf:
+    name:
+      - vim
+      - wget
+      - unzip
+      - chrony
+      - net-tools
+      - python3
+    state: present
+
+- name: Install boto3 with pip
+  become: yes
+  pip:
+    name:
+      - boto3
+      - botocore
+    executable: pip3
+
+#- name: Install amazon.aws collection
+#  command:
+#    cmd: ansible-galaxy collection install amazon.aws
+#  changed_when: false
+
+- name: Start chronyd
+  service:
+    name: chronyd
+    state: started
+    enabled: true
+
+- name: Disable SELinux
+  selinux:
+    state: disabled
+
+#- name: Stop and disable firewalld
+#  service:
+#    name: firewalld
+#    state: stopped
+#    enabled: no
+
+- name: Download Oracle preinstall RPM
+  get_url:
+    url: https://yum.oracle.com/repo/OracleLinux/OL8/appstream/x86_64/getPackage/oracle-database-preinstall-19c-1.0-2.el8.x86_64.rpm
+    dest: /tmp/oracle-preinstall.rpm
+
+- name: Install Oracle preinstall RPM
+  become: true
+  dnf:
+    name: /tmp/oracle-preinstall.rpm
+    state: present
+    disable_gpg_check: true
+    
+- name: Create Oracle directories
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: oracle
+    group: oinstall
+    mode: "{{ item.mode }}"
+    recurse: yes
+  loop:
+    - { path: "{{ oracle_home }}", mode: "0775" }
+    - { path: "{{ oracle_datafile_destination }}", mode: "0775" }
+    - { path: " {{ fra_destination }}", mode: "0775"}
+
+- name: Check swapfile
+  stat:
+    path: /swapfile
+  register: swapfile
+
+- name: Recreate invalid swapfile
+  block:
+
+    - command: swapoff /swapfile
+      failed_when: false
+
+    - file:
+        path: /swapfile
+        state: absent
+
+    - command: fallocate -l 4G /swapfile
+
+    - file:
+        path: /swapfile
+        owner: root
+        group: root
+        mode: '0600'
+
+    - command: mkswap /swapfile
+
+  when:
+    - not swapfile.stat.exists or swapfile.stat.size != 4294967296
+
+- name: Enable swap if not active
+  shell: |
+    swapon --show | grep -q /swapfile || swapon /swapfile
+  args:
+    executable: /bin/bash
+
+- name: Persist swap in fstab
+  mount:
+    name: none
+    src: /swapfile
+    fstype: swap
+    opts: sw
+    state: present
+
+- name: Configure Oracle environment in .bashrc
+  blockinfile:
+    path: /home/oracle/.bashrc
+    marker: "# {mark} ORACLE ENVIRONMENT"
+    block: |
+      export ORACLE_BASE={{ oracle_base }}
+      export ORACLE_HOME={{ oracle_home }}
+      export ORACLE_SID={{ oracle_sid }}
+      export PATH={{ oracle_home }}/bin:$PATH

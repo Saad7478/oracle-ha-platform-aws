@@ -1,0 +1,15 @@
+{{ primary_service_name }} =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = {{ hostvars['primary_db']['ansible_host'] }})(PORT = 1521))
+    (CONNECT_DATA =
+      (SID = {{ oracle_sid }})
+    )
+  )
+
+{{ oracle_pdbname }} =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = {{ hostvars['primary_db']['ansible_host'] }})(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVICE_NAME = {{ oracle_pdbname }})
+    )
+  )

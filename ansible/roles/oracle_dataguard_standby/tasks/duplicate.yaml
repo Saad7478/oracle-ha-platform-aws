@@ -1,0 +1,27 @@
+- name: Run RMAN duplicate
+  become: yes
+  become_user: oracle
+  shell: |
+    export ORACLE_HOME={{ oracle_home }}
+    export ORACLE_SID={{ oracle_sid }}
+    export PATH=$ORACLE_HOME/bin:$PATH
+
+    rman target sys/"{{ sys_password }}"@{{ primary_service_name }} auxiliary sys/"{{ sys_password }}"@{{ standby_service_name }} <<EOF
+
+    DUPLICATE TARGET DATABASE
+    FOR STANDBY
+    FROM ACTIVE DATABASE
+    DORECOVER
+    NOFILENAMECHECK;
+
+    EXIT;
+    EOF
+  register: rman_duplicate
+
+- name: Ensure standby database exists in oratab
+  become: true
+  lineinfile:
+    path: "{{ oracle_oratab}}"
+    line: "{{ oracle_sid }}:{{ oracle_home }}:N"
+    regexp: "^{{ oracle_sid }}:"
+    state: present

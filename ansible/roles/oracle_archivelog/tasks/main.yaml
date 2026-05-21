@@ -1,0 +1,90 @@
+- name: Create FRA directory
+  file:
+    path: "{{ fra_destination }}"
+    state: directory
+    owner: oracle
+    group: oinstall
+    mode: '0775'
+
+- name: Enable ARCHIVELOG and FORCE LOGGING
+  become: yes
+  become_user: oracle
+  shell: |
+    export ORACLE_HOME={{ oracle_home }}
+    export ORACLE_SID={{ oracle_sid }}
+    export PATH=$ORACLE_HOME/bin:$PATH
+
+    sqlplus / as sysdba <<EOF
+
+    alter system set db_recovery_file_dest_size={{ fra_size }} scope=both;
+    alter system set db_recovery_file_dest='{{ fra_destination }}' scope=both;
+    
+    show parameter db_recovery_file_dest;
+    show parameter db_recovery_file_dest_size;
+
+    shutdown immediate;
+    startup mount;
+
+    alter database archivelog;
+    alter database force logging;
+
+    alter database open;
+
+    alter system switch logfile;
+    ALTER SYSTEM ARCHIVE LOG CURRENT;
+
+    archive log list;
+
+    exit;
+    EOF
+  register: archivelog_result
+
+- name: Debug archive mode
+  debug:
+    var: archivelog_result.stdout_lines
+  
+
+- name: Check archive log mode
+  become: yes
+  become_user: oracle
+  shell: |
+    export ORACLE_HOME={{ oracle_home }}
+    export ORACLE_SID={{ oracle_sid }}
+    export PATH=$ORACLE_HOME/bin:$PATH
+
+    sqlplus -s / as sysdba <<EOF
+    set heading off feedback off
+
+    select log_mode from v\$database;
+
+    exit;
+    EOF
+  register: archive_mode
+  
+
+- name: Debug Enable archive mode
+  debug:
+    var: archive_mode.stdout_lines
+
+- name: Assert ARCHIVELOG mode enabled
+  assert:
+    that:
+      - "'ARCHIVELOG' in archive_mode.stdout"
+
+- name: Check force logging
+  become: yes
+  become_user: oracle
+  shell: |
+    export ORACLE_HOME={{ oracle_home }}
+    export ORACLE_SID={{ oracle_sid }}
+    export PATH=$ORACLE_HOME/bin:$PATH
+
+    sqlplus -s / as sysdba <<EOF
+    set heading off feedback off
+
+    select force_logging from v\$database;
+
+    exit;
+    EOF
+  register: force_logging
+  

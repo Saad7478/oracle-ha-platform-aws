@@ -1,0 +1,17 @@
+- name: Check standby role
+  become: yes
+  become_user: oracle
+  shell: |
+    export ORACLE_HOME={{ oracle_home }}
+    export ORACLE_SID={{ oracle_sid }}
+    export PATH=$ORACLE_HOME/bin:$PATH
+
+    sqlplus -s / as sysdba <<EOF
+    set heading off feedback off
+
+    select database_role, open_mode from v\$database;
+
+    exit;
+    EOF
+  register: standby_validation
+  changed_when: false

@@ -1,0 +1,94 @@
+- name: Copy password file from primary
+  fetch:
+    src: "{{ oracle_home }}/dbs/orapw{{ oracle_sid }}"
+    dest: /tmp/orapw{{ oracle_sid }}
+    flat: yes
+
+- block:
+
+  - name: Configure Data Guard parameters
+    shell: |
+      sqlplus / as sysdba <<EOF
+      alter system set db_unique_name='{{ primary_unique_name }}' scope=spfile;
+      alter system set log_archive_config='DG_CONFIG=({{ primary_unique_name }},{{ standby_unique_name }})' scope=both;
+
+      alter system set log_archive_dest_1=
+      'LOCATION=USE_DB_RECOVERY_FILE_DEST
+      VALID_FOR=(ALL_LOGFILES,ALL_ROLES)
+      DB_UNIQUE_NAME={{ primary_unique_name }}'
+      scope=both;
+
+      alter system set log_archive_dest_2=
+      'SERVICE={{ standby_service_name }}
+      ASYNC
+      VALID_FOR=(ONLINE_LOGFILES,PRIMARY_ROLE)
+      DB_UNIQUE_NAME={{ standby_unique_name }}'
+      scope=both;
+
+      alter system set fal_server='{{ standby_unique_name }}' scope=both;
+
+      alter system set standby_file_management='AUTO' scope=both;
+
+      exit;
+      EOF
+    register: dg_config
+    failed_when: false
+
+  - name: Check standby redo logs
+    shell: |
+      sqlplus -s / as sysdba <<EOF
+      select count(*) from v\$standby_log;
+      exit;
+      EOF
+    register: standby_log_count
+    changed_when: false
+
+  - name: Create standby redo logs
+    shell: |
+      sqlplus / as sysdba <<EOF
+
+      alter database add standby logfile group 4 ('{{ oracle_datafile_destination }}/{{ primary_unique_name | upper }}/standby_redo04.log') size 20M;
+      alter database add standby logfile group 5 ('{{ oracle_datafile_destination }}/{{ primary_unique_name | upper }}/standby_redo05.log') size 20M;
+      alter database add standby logfile group 6 ('{{ oracle_datafile_destination }}/{{ primary_unique_name | upper }}/standby_redo06.log') size 20M;
+      alter database add standby logfile group 7 ('{{ oracle_datafile_destination }}/{{ primary_unique_name | upper }}/standby_redo07.log') size 20M;
+
+      select group#, status, bytes/1024/1024 mb
+      from v\$standby_log;
+
+      exit;
+      EOF
+    register: standby_logs_result
+    when: standby_log_count.stdout | trim == "0"
+    failed_when: "'ORA-' in standby_logs_result.stdout"
+    
+  - name: Configure tnsnames.ora
+    template:
+      src: tnsnames.ora.j2
+      dest: "{{ oracle_home }}/network/admin/tnsnames.ora"
+      owner: oracle
+      group: oinstall
+      mode: '0644'
+
+  - name: Validate Data Guard configuration
+    shell: |
+      sqlplus -s / as sysdba <<EOF
+      set lines 200
+      col name for a20
+      col value for a80
+
+      select name, value from v\$parameter
+      where name like '%archive%'
+      or name like '%standby%'
+      or name like '%fal%';
+
+      exit;
+      EOF
+    register: dg_validation
+    changed_when: false
+
+  become: yes
+  become_user: oracle
+  environment:
+    ORACLE_HOME: "{{ oracle_home }}"
+    ORACLE_SID: "{{ oracle_sid }}"
+    PATH: "{{ oracle_home }}/bin:{{ ansible_env.PATH }}"

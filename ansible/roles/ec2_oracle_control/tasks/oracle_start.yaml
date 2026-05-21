@@ -1,0 +1,39 @@
+- name: "ORACLE | Start listener"
+  shell: lsnrctl start
+  register: listener_start
+  failed_when: listener_start.rc not in [0, 1]
+  changed_when: "'already' not in listener_start.stdout"
+
+- name: "ORACLE | Startup database"
+  shell: |
+    sqlplus -s / as sysdba <<EOF
+    STARTUP;
+    EXIT;
+    EOF
+  register: oracle_startup
+  
+  failed_when: >
+    "'ORA-' in oracle_startup.stdout" and
+    "'ORA-01081' not in oracle_startup.stdout"
+
+  changed_when: >
+    "'Database opened' in oracle_startup.stdout"  or
+    "'ORACLE instance started' in oracle_startup.stdout"
+
+- name: "ORACLE | Start MRP on STANDBY"
+  shell: |
+    sqlplus -s / as sysdba <<EOF
+    ALTER DATABASE RECOVER MANAGED STANDBY DATABASE DISCONNECT FROM SESSION;
+    EXIT;
+    EOF
+  register: mrp_start
+
+  failed_when: >
+    'ORA-' in mrp_start.stdout and
+    'ORA-01153' not in mrp_start.stdout
+
+  changed_when: >
+    'Media Recovery Waiting for thread' in mrp_start.stdout or
+    'completed successfully' in mrp_start.stdout
+
+  when: "'standby' in group_names"
