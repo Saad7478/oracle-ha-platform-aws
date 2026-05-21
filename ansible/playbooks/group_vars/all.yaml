@@ -1,15 +1,30 @@
 oracle_base: /u01/app/oracle
-oracle_home: /u01/app/oracle/product/19.0.0/dbhome_1
+oracle_home: /u01/app/oracle/product/19.3.0/dbhome_1
 oracle_inventory: /u01/app/oraInventory
-oracle_data : /u02/oradata/CDB1
 oracle_datafile_destination: /u02/oradata
 oracle_recovery_file_dest: /u02/fra
+oracle_oratab: /etc/oratab
 oracle_sid: cdb1
 oracle_pdbname: pdb1
-oracle_version: 19.0.0
+oracle_charset: AL32UTF8
+oracle_memory_mb: 600
+listener_name: LISTENER
+listener_port: 1521
+oracle_version: 19.3.0
 aws_region: us-east-2
 aws_profile: aws2
 sys_password: "{{ vault_sys_password }}"
 system_password: "{{ vault_system_password }}"
 pdbadmin_password: "{{ vault_pdbadmin_password }}"
 dg_config_name: cdb1_DG
+primary_unique_name: paris
+primary_service_name: PARIS
+standby_unique_name: lyon
+standby_service_name: LYON
+fra_destination: /u02/fra
+fra_size: 10G
+oracle_hostname: "{{ ansible_hostname }}"
+oracle_version: 19.3.0
+oracle_install_zip: LINUX.X64_193000_db_home.zip
+software_s3_bucket: software2474
+oracle_install_zip: LINUX.X64_193000_db_home.zip

@@ -1,4 +1,4 @@
-- hosts: primary
+- hosts: oracle_servers
   become: yes
 
   vars_files:

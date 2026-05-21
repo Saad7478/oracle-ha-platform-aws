@@ -1,9 +1,9 @@
-- hosts: primary
+- hosts: oracle_servers
   become: yes
 
   vars_files:
     - group_vars/vault.yaml
     - group_vars/all.yaml
-    
+  
   roles:
-    - oracle_archivelog
+    - oracle_clean
