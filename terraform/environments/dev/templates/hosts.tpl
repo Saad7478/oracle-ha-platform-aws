@@ -1,5 +1,5 @@
 [bastion]
-bastion ansible_host=${bastion_ip} ec2_instance_id=${bastion_id}
+bastion_ec2 ansible_host=${bastion_ip} ec2_instance_id=${bastion_id}
 
 [primary]
 primary_db ansible_host=${primary_ip} ec2_instance_id=${primary_id}

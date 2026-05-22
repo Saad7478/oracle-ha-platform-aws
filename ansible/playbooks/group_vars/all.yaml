@@ -24,7 +24,5 @@ standby_service_name: LYON
 fra_destination: /u02/fra
 fra_size: 10G
 oracle_hostname: "{{ ansible_hostname }}"
-oracle_version: 19.3.0
 oracle_install_zip: LINUX.X64_193000_db_home.zip
 software_s3_bucket: software2474
-oracle_install_zip: LINUX.X64_193000_db_home.zip

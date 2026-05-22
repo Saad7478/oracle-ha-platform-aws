@@ -27,7 +27,9 @@ Infrastructure-as-Code and DBA automation practices
 
 The goal of the project is to simulate a production-style Oracle HA environment while developing Cloud DBA / Platform DBA skills.
 
-# Architecture Overview
+# Architecture
+
+![Architecture](docs/architecture.png)
 
 ## Getting Started
 

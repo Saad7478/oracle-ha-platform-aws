@@ -1,3 +1,18 @@
+- name: Create RMAN duplicate script
+  become: yes
+  copy:
+    dest: /tmp/duplicate_standby.rman
+    owner: oracle
+    group: oinstall
+    mode: '0644'
+    content: |
+      DUPLICATE TARGET DATABASE
+      FOR STANDBY
+      FROM ACTIVE DATABASE
+      DORECOVER
+      NOFILENAMECHECK;
+      EXIT;
+
 - name: Run RMAN duplicate
   become: yes
   become_user: oracle
@@ -6,17 +21,30 @@
     export ORACLE_SID={{ oracle_sid }}
     export PATH=$ORACLE_HOME/bin:$PATH
 
-    rman target sys/"{{ sys_password }}"@{{ primary_service_name }} auxiliary sys/"{{ sys_password }}"@{{ standby_service_name }} <<EOF
-
-    DUPLICATE TARGET DATABASE
-    FOR STANDBY
-    FROM ACTIVE DATABASE
-    DORECOVER
-    NOFILENAMECHECK;
-
-    EXIT;
-    EOF
+    rman \
+      log=/tmp/rman_duplicate.log \
+      target "sys/{{ sys_password }}@{{ primary_service_name }}" \
+      auxiliary "sys/{{ sys_password }}@{{ standby_service_name }}" \
+      cmdfile=/tmp/duplicate_standby.rman
+  args:
+    executable: /bin/bash
   register: rman_duplicate
+
+- name: Display RMAN output
+  debug:
+    var: rman_duplicate.stdout_lines
+
+- name: Display RMAN error output
+  debug:
+    var: rman_duplicate.stderr_lines
+
+- name: Show RMAN log tail
+  become: yes
+  shell: tail -50 /tmp/rman_duplicate.log
+  register: rman_log
+
+- debug:
+    var: rman_log.stdout_lines
 
 - name: Ensure standby database exists in oratab
   become: true

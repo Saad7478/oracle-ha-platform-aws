@@ -3,24 +3,24 @@
     path: /tmp/{{ oracle_install_zip }}
   register: oracle_zip
 
-- name: Copy Oracle 19c binaries
-  copy:
-    src: "{{ oracle_install_zip }}"
-    dest: /tmp/{{ oracle_install_zip }}
-    owner: oracle
-    group: oinstall
-    mode: '0644'
-  when: not oracle_zip.stat.exists
-
-#- name: Download Oracle 19c binaries from S3
-#  amazon.aws.s3_object:
-#    bucket: "{{ software_s3_bucket }}"
-#    object: "oracle/{{ oracle_install_zip }}"
-#    dest: "/tmp/{{ oracle_install_zip }}"
-#    mode: get
-#    overwrite: different
-#    region: "{{ aws_region }}"
+#- name: Copy Oracle 19c binaries
+#  copy:
+#    src: "{{ oracle_install_zip }}"
+#    dest: /tmp/{{ oracle_install_zip }}
+#    owner: oracle
+#    group: oinstall
+#    mode: '0644'
 #  when: not oracle_zip.stat.exists
+
+- name: Download Oracle 19c binaries from S3
+  amazon.aws.s3_object:
+    bucket: "{{ software_s3_bucket }}"
+    object: "oracle/{{ oracle_install_zip }}"
+    dest: "/tmp/{{ oracle_install_zip }}"
+    mode: get
+    overwrite: different
+    region: "{{ aws_region }}"
+  when: not oracle_zip.stat.exists
 
 - name: Unzip Oracle binaries
   become: yes

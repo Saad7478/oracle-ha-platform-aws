@@ -1,20 +1,13 @@
-db_name=cdb1
+db_name={{ oracle_sid }}
+
 db_unique_name={{ standby_unique_name }}
 
 enable_pluggable_database=true
 
-memory_target=600M
-control_files='/u02/oradata/control01.ctl'
+memory_target= {{ oracle_memory_mb }}M
 
 fal_server={{ primary_unique_name }}
 
-standby_file_management=AUTO
+db_file_name_convert='{{ oracle_datafile_destination }}/{{ primary_unique_name | upper }}/','{{ oracle_datafile_destination }}/{{ standby_unique_name | upper }}/'
 
-db_recovery_file_dest='/u02/fra'
-db_recovery_file_dest_size=10G
-
-remote_login_passwordfile='EXCLUSIVE'
-
-db_file_name_convert='/u02/oradata/PARIS/','/u02/oradata/LYON/'
-
-log_file_name_convert='/u02/oradata/PARIS/','/u02/oradata/LYON/'
+log_file_name_convert='{{ oracle_datafile_destination }}/{{ primary_unique_name | upper }}/','{{ oracle_datafile_destination }}/{{ standby_unique_name | upper }}/'

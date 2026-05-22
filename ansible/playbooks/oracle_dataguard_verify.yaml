@@ -1,4 +1,4 @@
-- hosts: oracle_hosts
+- hosts: oracle_servers
   become: yes
 
   vars_files:

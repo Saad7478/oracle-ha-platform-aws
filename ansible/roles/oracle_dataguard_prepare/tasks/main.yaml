@@ -37,16 +37,31 @@
   - name: Check standby redo logs
     shell: |
       sqlplus -s / as sysdba <<EOF
+      set heading off;
+      set feedback off;
+      set pagesize 0;
+      set verify off;
+      set echo off;
+    
       select count(*) from v\$standby_log;
       exit;
       EOF
     register: standby_log_count
     changed_when: false
 
+  - debug:
+      msg: "'{{ standby_log_count.stdout }}'"
+
   - name: Create standby redo logs
     shell: |
-      sqlplus / as sysdba <<EOF
-
+      sqlplus -s / as sysdba <<EOF
+      whenever sqlerror exit sql.sqlcode;
+      set heading off;
+      set feedback off;
+      set pagesize 0;
+      set verify off;
+      set echo off;
+      
       alter database add standby logfile group 4 ('{{ oracle_datafile_destination }}/{{ primary_unique_name | upper }}/standby_redo04.log') size 20M;
       alter database add standby logfile group 5 ('{{ oracle_datafile_destination }}/{{ primary_unique_name | upper }}/standby_redo05.log') size 20M;
       alter database add standby logfile group 6 ('{{ oracle_datafile_destination }}/{{ primary_unique_name | upper }}/standby_redo06.log') size 20M;
@@ -60,7 +75,14 @@
     register: standby_logs_result
     when: standby_log_count.stdout | trim == "0"
     failed_when: "'ORA-' in standby_logs_result.stdout"
-    
+
+ 
+
+  - debug:
+      msg:
+        stdout: "{{ standby_logs_result.stdout_lines }}"
+        stderr: "{{ standby_logs_result.stderr_lines }}"
+
   - name: Configure tnsnames.ora
     template:
       src: tnsnames.ora.j2
