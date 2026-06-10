@@ -149,7 +149,7 @@ ansible_ssh_common_args='-o ProxyJump=rocky@3.151.185.42 -o ForwardAgent=yes'
 ```
 
 #### 9. Configure SSH Access
-Update your local SSH configuration file (~/.ssh/config):
+Example of generated SSH configuration file (~/.ssh/config):
 
 ```text
 Host bastion
@@ -229,7 +229,7 @@ This command triggers the following automation sequence:
 * Validate Data Guard: oracle_dataguard_verify.yaml
 * Configure Data Guard Broker: oracle_dataguard_broker.yml
 
-# 14. Validate Oracle Data Guard
+#### 14. Validate Oracle Data Guard
 Connect to the primary database via SQL*Plus:
 
 ```SQL
