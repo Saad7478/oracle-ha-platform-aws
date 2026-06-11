@@ -115,3 +115,5 @@ ansible/playbooks/oracle_clean.yaml
 ansible/roles/oracle_db_deletion/
 ansible/roles/oracle_clean/
 ansible/roles/ec2_oracle_control/
+
+.gitignore

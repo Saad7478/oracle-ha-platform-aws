@@ -29,19 +29,20 @@
   args:
     executable: /bin/bash
   register: rman_duplicate
+  failed_when: >
+    rman_duplicate.rc != 0 or 
+    "RMAN-" in rman_duplicate.stdout or 
+    "ORA-" in rman_duplicate.stdout
 
 - name: Display RMAN output
   debug:
     var: rman_duplicate.stdout_lines
 
-- name: Display RMAN error output
-  debug:
-    var: rman_duplicate.stderr_lines
-
 - name: Show RMAN log tail
   become: yes
   shell: tail -50 /tmp/rman_duplicate.log
   register: rman_log
+  changed_when: false
 
 - debug:
     var: rman_log.stdout_lines
@@ -49,7 +50,7 @@
 - name: Ensure standby database exists in oratab
   become: true
   lineinfile:
-    path: "{{ oracle_oratab}}"
+    path: "{{ oracle_oratab }}"
     line: "{{ oracle_sid }}:{{ oracle_home }}:N"
     regexp: "^{{ oracle_sid }}:"
     state: present

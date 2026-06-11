@@ -14,6 +14,17 @@
     group: oinstall
     mode: '0644'
 
+- name: Check if Oracle listener is already running
+  become: yes
+  become_user: oracle
+  shell: |
+    export ORACLE_HOME={{ oracle_home }}
+    export PATH=$ORACLE_HOME/bin:$PATH
+    lsnrctl status {{ listener_name | default('LISTENER') }}
+  register: listener_check
+  failed_when: false
+  changed_when: false
+
 - name: Start Oracle listener
   become: yes
   become_user: oracle
@@ -22,7 +33,16 @@
     export PATH=$ORACLE_HOME/bin:$PATH
 
     lsnrctl start {{ listener_name }}
-  failed_when: false
+  when: listener_check.rc != 0
+
+- name: Reload Oracle listener (if already running to apply changes)
+  become: yes
+  become_user: oracle
+  shell: |
+    export ORACLE_HOME={{ oracle_home }}
+    export PATH=$ORACLE_HOME/bin:$PATH
+    lsnrctl reload {{ listener_name | default('LISTENER') }}
+  when: listener_check.rc == 0
 
 - name: Check listener status
   become: yes

@@ -5,6 +5,7 @@ oracle_datafile_destination: /u02/oradata
 oracle_recovery_file_dest: /u02/fra
 oracle_oratab: /etc/oratab
 oracle_sid: cdb1
+db_name: cdb1
 oracle_pdbname: pdb1
 oracle_charset: AL32UTF8
 oracle_memory_mb: 600

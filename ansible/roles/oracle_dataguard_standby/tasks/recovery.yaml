@@ -6,9 +6,13 @@
     export ORACLE_SID={{ oracle_sid }}
     export PATH=$ORACLE_HOME/bin:$PATH
 
-    sqlplus / as sysdba <<EOF
-
+    sqlplus / as sysdba << 'EOF'
+    whenever sqlerror exit failure;
     alter database recover managed standby database disconnect from session;
-
     exit;
     EOF
+  register: mrp_start
+  changed_when: true
+  failed_when: >
+    mrp_start.rc != 0 or 
+    "ORA-" in mrp_start.stdout

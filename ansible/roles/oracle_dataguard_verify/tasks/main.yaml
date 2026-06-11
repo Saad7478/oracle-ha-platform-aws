@@ -1,43 +1,48 @@
 - block:
 
-  # ----------------------------------------------------------
-  # 1. Connectivity & Instance Status
-  # ----------------------------------------------------------
-  - name: "PRIMARY | CHECK INSTANCE STATUS"
-    shell: |
-      sqlplus -s / as sysdba <<EOF
-      SET PAGESIZE 0 FEEDBACK OFF
-      SELECT status FROM v\$instance;
-      EXIT;
-      EOF
-    register: primary_status
-    changed_when: false
+    # ----------------------------------------------------------
+    # 1. Connectivity & Instance Status
+    # ----------------------------------------------------------
+    - name: "PRIMARY | CHECK INSTANCE STATUS"
+      shell: |
+        sqlplus -s / as sysdba << 'EOF'
+        SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF
+        SELECT status FROM v$instance;
+        EXIT;
+        EOF
+      register: primary_status
+      changed_when: false
+      failed_when: >
+        primary_status.rc != 0 or 
+        "ORA-" in primary_status.stdout
 
-  - name: "PRIMARY | DISPLAY INSTANCE_STATUS"
-    debug:
-      msg: "Statut instance PRIMARY : {{ primary_status.stdout | trim }}"
+    - name: "PRIMARY | DISPLAY INSTANCE_STATUS"
+      debug:
+        msg: "Statut instance PRIMARY : {{ primary_status.stdout | trim }}"
 
-  # ----------------------------------------------------------
-  # 2. CHECK DATABASE ROLE
-  # ----------------------------------------------------------
-  - name: "PRIMARY | CHECK DATABASE"
-    shell: |
-      sqlplus -s / as sysdba <<EOF
-      SET PAGESIZE 0 FEEDBACK OFF
-      SELECT name, database_role, open_mode, protection_mode, protection_level, log_mode from v\$database;
-      EXIT;
-      EOF
-    register: primary_role
-    changed_when: false
+    # ----------------------------------------------------------
+    # 2. CHECK DATABASE ROLE
+    # ----------------------------------------------------------
+    - name: "PRIMARY | CHECK DATABASE"
+      shell: |
+        sqlplus -s / as sysdba << 'EOF'
+        SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF LINESIZE 200
+        SELECT name || ',' || database_role || ',' || open_mode || ',' || protection_mode || ',' || protection_level || ',' || log_mode from v$database;
+        EXIT;
+        EOF
+      register: primary_role
+      changed_when: false
+      failed_when: >
+        primary_role.rc != 0 or 
+        "ORA-" in primary_role.stdout
 
-  - name: "PRIMARY | DISPLAY ROLE"
-    debug:
-      msg: "PRIMARY ROLE: {{ primary_role.stdout | trim }}"
-
+    - name: "PRIMARY | DISPLAY ROLE"
+      debug:
+        msg: "PRIMARY INFO (name,role,mode,prot_mode,prot_lvl,log): {{ primary_role.stdout | trim }}"
 
   become: yes
   become_user: oracle
   environment:
     ORACLE_HOME: "{{ oracle_home }}"
     ORACLE_SID: "{{ oracle_sid }}"
-    PATH: "{{ oracle_home }}/bin:{{ ansible_env.PATH }}"
+    PATH: "{{ oracle_home }}/bin:{{ ansible_env.PATH | default('/bin:/usr/bin') }}"

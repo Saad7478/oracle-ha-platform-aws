@@ -52,7 +52,7 @@ Before deploying the platform, ensure the following prerequisites are available:
 
 #### 1. Clone the Repository
 ```bash
-git clone [https://github.com/Saad7478/oracle-ha-platform-aws.git](https://github.com/Saad7478/oracle-ha-platform-aws.git)
+git clone https://github.com/Saad7478/oracle-ha-platform-aws.git
 cd oracle-ha-platform-aws
 ```
 

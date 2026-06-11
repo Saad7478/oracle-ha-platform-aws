@@ -25,7 +25,7 @@
       DB_UNIQUE_NAME={{ standby_unique_name }}'
       scope=both;
 
-      alter system set fal_server='{{ standby_unique_name }}' scope=both;
+      alter system set fal_server='{{ standby_unique_name }}' scope=spfile;
 
       alter system set standby_file_management='AUTO' scope=both;
 
@@ -75,8 +75,6 @@
     register: standby_logs_result
     when: standby_log_count.stdout | trim == "0"
     failed_when: "'ORA-' in standby_logs_result.stdout"
-
- 
 
   - debug:
       msg:

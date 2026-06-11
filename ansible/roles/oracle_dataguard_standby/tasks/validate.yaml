@@ -6,12 +6,17 @@
     export ORACLE_SID={{ oracle_sid }}
     export PATH=$ORACLE_HOME/bin:$PATH
 
-    sqlplus -s / as sysdba <<EOF
-    set heading off feedback off
-
-    select database_role, open_mode from v\$database;
-
+    sqlplus -s / as sysdba << 'EOF'
+    set heading off;
+    set feedback off;
+    set pagesize 0;
+    set verify off;
+    
+    select database_role || ',' || open_mode from v$database;
     exit;
     EOF
   register: standby_validation
   changed_when: false
+  failed_when: >
+    standby_validation.rc != 0 or 
+    "ORA-" in standby_validation.stdout

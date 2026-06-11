@@ -1,10 +1,10 @@
-db_name={{ oracle_sid }}
+db_name={{ db_name }}
 
 db_unique_name={{ standby_unique_name }}
 
 enable_pluggable_database=true
 
-memory_target= {{ oracle_memory_mb }}M
+memory_target={{ oracle_memory_mb }}M
 
 fal_server={{ primary_unique_name }}
 
